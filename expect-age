@@ -11,11 +11,13 @@ set password [lindex "$argv" 0]
 set encrypted_file [lindex "$argv" 1]
 set output_file [lindex "$argv" 2]
 
+# Check file is existed before decryption
 if {![file exists $encrypted_file]} {
   send_user "ERROR: File not found: $encrypted_file\n"
   exit 1
 }
 
+# Check if age command is available
 set age_path [auto_execok age]
 if {$age_path eq ""} {
   send_user "ERROR: 'age' command not found\n"
@@ -53,6 +55,8 @@ expect {
       }
     }
   }
+
+  # If the password prompt is not encountered, exit
   timeout {
     send_user "ERROR: Encrypted file $encrypted_file not has passphrase\n"
     exit 1
