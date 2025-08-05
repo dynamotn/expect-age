@@ -1,0 +1,60 @@
+#!/usr/bin/env expect
+
+# Check if the correct number of arguments is provided
+if {"$argc" != 3} {
+  send_user "Usage: $argv0 <password> <encrypted_file> <output_file>\n"
+  exit 1
+}
+
+# Get the password and file from command-line arguments
+set password [lindex "$argv" 0]
+set encrypted_file [lindex "$argv" 1]
+set output_file [lindex "$argv" 2]
+
+if {![file exists $encrypted_file]} {
+  send_user "ERROR: File not found: $encrypted_file\n"
+  exit 1
+}
+
+set age_path [auto_execok age]
+if {$age_path eq ""} {
+  send_user "ERROR: 'age' command not found\n"
+  exit 1
+}
+
+# Spawn the age command
+spawn age -d -o "$output_file" "$encrypted_file"
+
+# Wait for the password prompt
+set timeout 10
+expect {
+  -nocase -re "Enter passphrase: " {
+
+    # Send the password followed by a newline
+    send "$password\r"
+
+    # Wait for the command to finish and capture its output
+    set timeout 60
+    expect {
+      eof {
+        # Command completed, display its exit status
+        catch wait result
+        set exit_status [lindex $result 3]
+        if {$exit_status == 0} {
+          send_user "INFO: Decryption successful: $encrypted_file\n"
+        } else {
+          send_user "ERROR: Decryption failed: $encrypted_file\n"
+        }
+        exit $exit_status
+      }
+      timeout {
+        send_user "ERROR: Decryption process timed out\n"
+        exit 1
+      }
+    }
+  }
+  timeout {
+    send_user "ERROR: Encrypted file $encrypted_file not has passphrase\n"
+    exit 1
+  }
+}

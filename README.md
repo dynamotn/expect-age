@@ -30,7 +30,7 @@ brew install expect
 Next, add `expect-age` to your `PATH` and make it executable. Now you can decrypt files non-interactively:
 
 ```bash
-expect-age "your-password" "/path/to/your/encrypted_file.age" "/path/to/your/decrypted_file.txt"
+expect-age "your-password" "/path/to/your/encrypted_file.age" "/path/to/your/output_file.txt"
 ```
 
 Automate your workflows with ease ⏩!
